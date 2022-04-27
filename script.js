@@ -321,6 +321,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
+    if (page === "endGame") window.location.reload(true);
     for (let touch of event.touches) {
       for (let o of objects) {
         o.isInside(touch);
@@ -344,45 +345,60 @@
   });
 
   function draw() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    for (let o of objects) {
-      if (objects[0] !== undefined)
-        if (o.draw()) delete objects[objects.indexOf(o)];
-      objects = objects.filter(function (element) {
-        return element !== undefined;
-      });
+    if (page === "game") {
+      if (objects.length == 1) page = "endGame";
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      for (let o of objects) {
+        if (objects[0] !== undefined)
+          if (o.draw()) delete objects[objects.indexOf(o)];
+        objects = objects.filter(function (element) {
+          return element !== undefined;
+        });
+      }
+      for (let l of laser) {
+        if (laser[0] !== undefined)
+          if (!l.draw()) delete laser[laser.indexOf(l)];
+        laser = laser.filter(function (element) {
+          return element !== undefined;
+        });
+      }
+      for (let w of walls) {
+        if (walls[0] !== undefined)
+          if (w.draw()) delete walls[walls.indexOf(w)];
+        walls = walls.filter(function (element) {
+          return element !== undefined;
+        });
+      }
     }
-    for (let l of laser) {
-      if (laser[0] !== undefined) if (!l.draw()) delete laser[laser.indexOf(l)];
-      laser = laser.filter(function (element) {
-        return element !== undefined;
-      });
+    if (page === "endGame") {
+      context.save();
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.scale(12, 12);
+      context.lineWitdth = 6;
+      context.beginPath();
+      context.fillStyle = "white";
+      context.rect(-20, -20, 40, 40);
+
+      context.fill();
+
+      context.font = "2px Arial";
+      context.fillStyle = "black";
+      let text = "The Winner is";
+      context.fillText(text, -context.measureText(text).width / 2, -2);
+      text = objects[0].color;
+      context.fillStyle = objects[0].color;
+      context.fillText(text, -context.measureText(text).width / 2, 2);
+      context.fillStyle = "orange";
+      text = "(Click to Repeat)";
+      context.fillText(text, -context.measureText(text).width / 2, 8);
+      context.restore();
+      context.closePath();
     }
-    for (let w of walls) {
-      if (walls[0] !== undefined) if (w.draw()) delete walls[walls.indexOf(w)];
-      walls = walls.filter(function (element) {
-        return element !== undefined;
-      });
-    }
-    if (objects.length == 1) page = "endGame";
   }
-  function gameEndScreen() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(12, 12);
-    context.lineWitdth = 6;
-    context.beginPath();
-    context.font = "1px Arial";
-    context.fillStyle = "white";
-    context.fillText("Game Winner is" + objects[0].color, 0, 0);
-    context.fill();
-    context.stroke();
-    context.restore();
-  }
-  function gameEndScreen() {}
+
   function animate() {
-    if (page === "game") draw();
-    if (page === "endGame") gameEndScreen();
+    draw();
+
     window.requestAnimationFrame(animate);
   }
   animate();
