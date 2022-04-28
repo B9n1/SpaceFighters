@@ -149,8 +149,8 @@
           alpha += deltaAngle;
         }
         if (oldPos.x) {
-          deltaPos.x = newPos.x - oldPos.x;
-          deltaPos.y = newPos.y - oldPos.y;
+          deltaPos.x = newPos.x - x;
+          deltaPos.y = newPos.y - y;
           if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
           if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
           x += deltaPos.x;
