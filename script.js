@@ -70,6 +70,8 @@
   function createSpaceShip(x, y, color, insideArray) {
     let myFingers = [];
     let alpha = (Math.sign(canvas.width / 2 - x) * Math.PI) / 2;
+    let oldAngle = undefined;
+    let deltaAngle = undefined;
     let healthBarX =
       canvas.width / 2 - (canvas.width / 4) * Math.sign(canvas.width / 2 - x);
     let Matrix;
@@ -124,15 +126,21 @@
     }
     function moveTo(touch) {
       updateMyFingers(touch);
+
       if (myFingers.length > 1) {
         x = (myFingers[0].x + myFingers[1].x) / 2;
         y = (myFingers[0].y + myFingers[1].y) / 2;
-        newAngle =
+
+        let newAngle =
           Math.atan2(
             myFingers[0].y - myFingers[1].y,
             myFingers[0].x - myFingers[1].x
           ) + Math.PI;
-        if (Math.abs(newAngle - alpha) < Math.PI) alpha = newAngle;
+        if (oldAngle) {
+          deltaAngle = newAngle - oldAngle;
+          alpha += deltaAngle;
+        }
+        oldAngle = newAngle;
       }
     }
     function updateMyFingers(touch) {
@@ -149,8 +157,9 @@
         shoot = false;
       } else {
         myFingers.length = 0;
+        oldAngle = undefined;
+        deltaAngle = undefined;
       }
-      //inside = false;
     }
     return {
       draw,
