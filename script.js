@@ -1,9 +1,17 @@
 (function Init() {
+  //////////////////////////////////////////////////////////////////////////////////
+  /////////// Globale Varibals /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
   let page = "game";
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
   context.canvas.height = window.innerHeight;
+  const laserDamge = 1;
+  const spaceShipHealth = 10;
+  const wallHealth = 30;
+  let notTouched = true;
+
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
@@ -93,19 +101,23 @@
   }
   function drawHealthBar(health, x, scale) {
     context.save();
-    context.translate(x, 10);
-    context.scale(scale, scale);
-    context.lineWitdth = 6;
-    context.beginPath();
-    context.rect(-25 / 2, 0, health / 4, 1);
-    context.fillStyle = "green";
-    context.fill();
-    context.beginPath();
+    context.translate(x, 40);
+    context.scale(scale / 2, scale / 2);
+    context.translate((-5 * spaceShipHealth) / 2, 0);
+    for (let i = 0; i < spaceShipHealth; i++) {
+      context.translate(5, 0);
+      context.beginPath();
+      context.moveTo(0, 2);
+      context.lineTo(-2, -1);
+      context.bezierCurveTo(-1 - 2 / 3, -2 - 2 / 3, -1 / 3, -2 - 2 / 3, 0, -1);
+      context.bezierCurveTo(1 / 3, -2 - 2 / 3, 1 + 2 / 3, -2 - 2 / 3, 2, -1);
+      context.lineTo(0, 2);
+      context.closePath();
+      if (i < health) context.fillStyle = "green";
+      else context.fillStyle = "red";
+      context.fill();
+    }
 
-    context.rect(health / 4 - 25 / 2, 0, (100 - health) / 4, 1);
-    context.fillStyle = "red";
-    context.closePath();
-    context.fill();
     context.restore();
   }
   function createSpaceShip(x, y, color, insideArray) {
@@ -126,7 +138,8 @@
     let Matrix;
     const path = createPath();
     let isDestroyed = false;
-    let health = 100;
+    let health = spaceShipHealth;
+
     function draw() {
       if (FingerPos.x != undefined) {
         deltaPos.x = FingerPos.x - x;
@@ -146,7 +159,7 @@
       localMatrix.invertSelf();
       for (let l of laser) {
         if (l.didItHit(path, Matrix, color)) {
-          health -= 10;
+          health -= laserDamge;
           if (health <= 0) isDestroyed = true;
         }
       }
@@ -334,7 +347,7 @@
   }
   function createWall(x, y) {
     const wallPath = createWallsPath();
-    let health = 300;
+    let health = wallHealth;
     let Matrix;
     let isDestroyed = false;
 
@@ -346,8 +359,8 @@
     function isHitByLaser() {
       for (let l of laser) {
         if (l.didItHit(wallPath, Matrix)) {
-          health -= 10;
-          if (health <= 1) isDestroyed = true;
+          health -= laserDamge;
+          if (health <= 0) isDestroyed = true;
         }
       }
     }
@@ -388,6 +401,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
+    notTouched = false;
     if (page === "endGame") window.location.reload(true);
     for (let touch of event.touches) {
       for (let o of objects) {
@@ -411,8 +425,10 @@
     }
   });
 
+  function showGameControlls() {}
   function draw() {
     if (page === "game") {
+      if (notTouched) showGameControlls();
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
       for (let l of laser) {
@@ -454,7 +470,7 @@
       let text = "The Winner is";
       context.fillText(text, -context.measureText(text).width / 2, -2);
       text = objects[0].color;
-      if (objects[0].color === "379A9A") text = "BLUE";
+      if (objects[0].color === "#379A9A") text = "BLUE";
       else text = "RED";
       context.fillStyle = objects[0].color;
       context.fillText(text, -context.measureText(text).width / 2, 2);
