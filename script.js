@@ -65,7 +65,6 @@
     context.rect(health / 4 - 25 / 2, 0, (100 - health) / 4, 1);
     context.fillStyle = "red";
     context.fill();
-
     context.restore();
   }
   function createSpaceShip(x, y, color, insideArray) {
@@ -127,19 +126,13 @@
       updateMyFingers(touch);
       if (myFingers.length > 1) {
         x = (myFingers[0].x + myFingers[1].x) / 2;
-        //console.log(newX);
         y = (myFingers[0].y + myFingers[1].y) / 2;
-
-        //console.log(newY);
-        //x = newX;
-        //y = newY;
-        alpha =
+        newAngle =
           Math.atan2(
             myFingers[0].y - myFingers[1].y,
             myFingers[0].x - myFingers[1].x
           ) + Math.PI;
-        //oldX = newX;
-        //oldY = newY;
+        if (newAngle < Math.PI) alpha = newAngle;
       }
     }
     function updateMyFingers(touch) {
