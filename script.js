@@ -87,7 +87,7 @@
     let isDestroyed = false;
     let health = 100;
     function draw() {
-      if (FingerPos.x) {
+      if (FingerPos.x != undefined) {
         deltaPos.x = FingerPos.x - x;
         deltaPos.y = FingerPos.y - y;
         if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
@@ -156,7 +156,6 @@
           deltaAngle = newAngle - oldAngle;
           alpha += deltaAngle;
         }
-
         oldAngle = newAngle;
       }
     }
