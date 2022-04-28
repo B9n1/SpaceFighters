@@ -374,7 +374,13 @@
     if (page === "game") {
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
-
+      for (let o of objects) {
+        if (objects[0] !== undefined)
+          if (o.draw()) delete objects[objects.indexOf(o)];
+        objects = objects.filter(function (element) {
+          return element !== undefined;
+        });
+      }
       for (let l of laser) {
         if (laser[0] !== undefined)
           if (!l.draw()) delete laser[laser.indexOf(l)];
@@ -386,13 +392,6 @@
         if (walls[0] !== undefined)
           if (w.draw()) delete walls[walls.indexOf(w)];
         walls = walls.filter(function (element) {
-          return element !== undefined;
-        });
-      }
-      for (let o of objects) {
-        if (objects[0] !== undefined)
-          if (o.draw()) delete objects[objects.indexOf(o)];
-        objects = objects.filter(function (element) {
           return element !== undefined;
         });
       }
