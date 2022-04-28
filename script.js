@@ -34,6 +34,41 @@
     spaceShip.closePath();
     return spaceShip;
   }
+  function createEngineAndFlames() {
+    context.beginPath();
+    // Engine
+    context.rect(-1, 4, 2, 1);
+    context.fillStyle = "grey";
+    context.fill();
+    context.closePath();
+    // Center Flame
+    context.beginPath();
+    context.fillStyle = "red";
+    context.moveTo(-2, 6);
+    context.bezierCurveTo(-1.5, 4.5, 1.5, 4.5, 2, 6);
+    context.lineTo(0, 11);
+    context.lineTo(-2, 6);
+    context.fill();
+    context.closePath();
+    // right Flame
+    context.beginPath();
+    context.fillStyle = "red";
+    context.moveTo(9, 2.5);
+    context.bezierCurveTo(9 + 1 / 3, 2, 9 + 2 / 3, 2, 10, 2.5);
+    context.lineTo(9.5, 5);
+    context.lineTo(9, 2.5);
+    context.fill();
+    context.closePath();
+    //  left Flame
+    context.beginPath();
+    context.fillStyle = "red";
+    context.moveTo(-9, 2.5);
+    context.bezierCurveTo(-9 - 1 / 3, 2, -9 - 2 / 3, 2, -10, 2.5);
+    context.lineTo(-9.5, 5);
+    context.lineTo(-9, 2.5);
+    context.fill();
+    context.closePath();
+  }
   function drawPath(path, color, x, y, scale, alpha, health) {
     context.save();
     context.translate(x, y);
@@ -43,10 +78,14 @@
     context.strokeStyle = "white";
     context.fillStyle = color;
     context.fill(path);
+    context.beginPath();
+    context.rect(-1, -5, 2, 1);
+    context.fillStyle = "blue";
+    context.fill();
+    context.closePath();
 
-    context.font = "2px Arial";
-    context.fillStyle = "white";
-    context.fillText(health, 0, 0);
+    //Engine and Flames
+    createEngineAndFlames();
     //Matrix
     let Matrix = context.getTransform();
     context.restore();
@@ -62,8 +101,10 @@
     context.fillStyle = "green";
     context.fill();
     context.beginPath();
+
     context.rect(health / 4 - 25 / 2, 0, (100 - health) / 4, 1);
     context.fillStyle = "red";
+    context.closePath();
     context.fill();
     context.restore();
   }
@@ -90,8 +131,8 @@
       if (FingerPos.x != undefined) {
         deltaPos.x = FingerPos.x - x;
         deltaPos.y = FingerPos.y - y;
-        if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
-        if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
+        if (Math.abs(deltaPos.x) > 4) deltaPos.x = Math.sign(deltaPos.x) * 4;
+        if (Math.abs(deltaPos.y) > 4) deltaPos.y = Math.sign(deltaPos.y) * 4;
         x += deltaPos.x;
         y += deltaPos.y;
       }
@@ -199,11 +240,11 @@
   //////////////////////////////////////////////////////////////////////////////////
   function creatLaserPath() {
     let laser = new Path2D();
-    laser.moveTo(-3, -1);
-    laser.lineTo(3, -1);
-    laser.lineTo(3, 1);
-    laser.lineTo(-3, 1);
-    laser.lineTo(-3, 1);
+    laser.moveTo(-3, -0.5);
+    laser.lineTo(3, -0.5);
+    laser.lineTo(3, 0.5);
+    laser.lineTo(-3, 0.5);
+    laser.lineTo(-3, 0.5);
     laser.closePath();
     return laser;
   }
@@ -223,7 +264,7 @@
   }
   function createLaser(x, y, angle, color) {
     const laserPath = creatLaserPath();
-    let speed = 4;
+    let speed = 12;
     function draw() {
       Matrix = drawLaser(laserPath, color, x, y, 6, angle);
       move();
@@ -325,7 +366,7 @@
   walls.push(createWall((canvas.width * 2) / 3, (canvas.height * 3) / 4));
 
   objects.push(
-    createSpaceShip(canvas.width / 8, canvas.height / 2, "red", [
+    createSpaceShip(canvas.width / 8, canvas.height / 2, "A91F1F", [
       0,
       0,
       context.canvas.width / 2,
@@ -334,7 +375,7 @@
   );
 
   objects.push(
-    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, "blue", [
+    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, "379A9A", [
       context.canvas.width / 2,
       0,
       context.canvas.width / 2,
@@ -413,6 +454,8 @@
       let text = "The Winner is";
       context.fillText(text, -context.measureText(text).width / 2, -2);
       text = objects[0].color;
+      if (objects[0].color === "379A9A") text = "BLUE";
+      else text = "RED";
       context.fillStyle = objects[0].color;
       context.fillText(text, -context.measureText(text).width / 2, 2);
       context.fillStyle = "orange";
