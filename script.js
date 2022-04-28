@@ -76,6 +76,10 @@
       x: undefined,
       y: undefined,
     };
+    let deltaPos = {
+      x: undefined,
+      y: undefined,
+    };
     let healthBarX =
       canvas.width / 2 - (canvas.width / 4) * Math.sign(canvas.width / 2 - x);
     let Matrix;
@@ -85,9 +89,9 @@
     function draw() {
       Matrix = drawPath(path, color, x, y, 12, alpha, health);
       drawHealthBar(health, healthBarX, 12);
-      if (newPos.x) {
-        deltaPos.x = newPos.x - x;
-        deltaPos.y = newPos.y - y;
+      if (FingerPos.x) {
+        deltaPos.x = FingerPos.x - x;
+        deltaPos.y = FingerPos.y - y;
         if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
         if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
         x += deltaPos.x;
