@@ -72,11 +72,7 @@
     let alpha = (Math.sign(canvas.width / 2 - x) * Math.PI) / 2;
     let oldAngle = undefined;
     let deltaAngle = undefined;
-    let oldPos = {
-      x: undefined,
-      y: undefined,
-    };
-    let deltaPos = {
+    let FingerPos = {
       x: undefined,
       y: undefined,
     };
@@ -89,6 +85,14 @@
     function draw() {
       Matrix = drawPath(path, color, x, y, 12, alpha, health);
       drawHealthBar(health, healthBarX, 12);
+      if (newPos.x) {
+        deltaPos.x = newPos.x - x;
+        deltaPos.y = newPos.y - y;
+        if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
+        if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
+        x += deltaPos.x;
+        y += deltaPos.y;
+      }
       isHitByLaser();
       return isDestroyed;
     }
@@ -135,7 +139,7 @@
       updateMyFingers(touch);
 
       if (myFingers.length > 1) {
-        let newPos = {
+        FingerPos = {
           x: (myFingers[0].x + myFingers[1].x) / 2,
           y: (myFingers[0].y + myFingers[1].y) / 2,
         };
@@ -148,16 +152,8 @@
           deltaAngle = newAngle - oldAngle;
           alpha += deltaAngle;
         }
-        if (oldPos.x) {
-          deltaPos.x = newPos.x - x;
-          deltaPos.y = newPos.y - y;
-          if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
-          if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
-          x += deltaPos.x;
-          y += deltaPos.y;
-        }
+
         oldAngle = newAngle;
-        oldPos = newPos;
       }
     }
     function updateMyFingers(touch) {
