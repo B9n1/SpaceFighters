@@ -110,6 +110,7 @@
         }
       }
     }
+
     function isInside(touch) {
       let isInsideRect = new Path2D();
       isInsideRect.rect(
