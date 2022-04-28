@@ -72,13 +72,20 @@
     let alpha = (Math.sign(canvas.width / 2 - x) * Math.PI) / 2;
     let oldAngle = undefined;
     let deltaAngle = undefined;
+    let oldPos = {
+      x: undefined,
+      y: undefined,
+    };
+    let deltaPos = {
+      x: undefined,
+      y: undefined,
+    };
     let healthBarX =
       canvas.width / 2 - (canvas.width / 4) * Math.sign(canvas.width / 2 - x);
     let Matrix;
     const path = createPath();
     let isDestroyed = false;
     let health = 100;
-
     function draw() {
       Matrix = drawPath(path, color, x, y, 12, alpha, health);
       drawHealthBar(health, healthBarX, 12);
@@ -128,9 +135,10 @@
       updateMyFingers(touch);
 
       if (myFingers.length > 1) {
-        x = (myFingers[0].x + myFingers[1].x) / 2;
-        y = (myFingers[0].y + myFingers[1].y) / 2;
-
+        let newPos = {
+          x: (myFingers[0].x + myFingers[1].x) / 2,
+          y: (myFingers[0].y + myFingers[1].y) / 2,
+        };
         let newAngle =
           Math.atan2(
             myFingers[0].y - myFingers[1].y,
@@ -140,7 +148,16 @@
           deltaAngle = newAngle - oldAngle;
           alpha += deltaAngle;
         }
+        if (oldPos.x) {
+          deltaPos.x = newPos.x - oldPos.x;
+          deltaPos.y = newPos.y - oldPos.y;
+          if (Math.abs(deltaPos.x) > 2) deltaPos.x = Math.sign(deltaPos.x) * 2;
+          if (Math.abs(deltaPos.y) > 2) deltaPos.y = Math.sign(deltaPos.y) * 2;
+          x += deltaPos.x;
+          y += deltaPos.y;
+        }
         oldAngle = newAngle;
+        oldPos = newPos;
       }
     }
     function updateMyFingers(touch) {
@@ -159,6 +176,14 @@
         myFingers.length = 0;
         oldAngle = undefined;
         deltaAngle = undefined;
+        oldPos = {
+          x: undefined,
+          y: undefined,
+        };
+        deltaPos = {
+          x: undefined,
+          y: undefined,
+        };
       }
     }
     return {
