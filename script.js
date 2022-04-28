@@ -366,7 +366,7 @@
   walls.push(createWall((canvas.width * 2) / 3, (canvas.height * 3) / 4));
 
   objects.push(
-    createSpaceShip(canvas.width / 8, canvas.height / 2, "A91F1F", [
+    createSpaceShip(canvas.width / 8, canvas.height / 2, "#A91F1F", [
       0,
       0,
       context.canvas.width / 2,
@@ -375,7 +375,7 @@
   );
 
   objects.push(
-    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, "379A9A", [
+    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, "#379A9A", [
       context.canvas.width / 2,
       0,
       context.canvas.width / 2,
