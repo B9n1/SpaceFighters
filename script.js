@@ -132,7 +132,7 @@
             myFingers[0].y - myFingers[1].y,
             myFingers[0].x - myFingers[1].x
           ) + Math.PI;
-        if (Math.abs(newAngle) < Math.PI) alpha = newAngle;
+        if (Math.abs(newAngle - alpha) < Math.PI) alpha = newAngle;
       }
     }
     function updateMyFingers(touch) {
