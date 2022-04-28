@@ -110,7 +110,6 @@
         }
       }
     }
-
     function isInside(touch) {
       let isInsideRect = new Path2D();
       isInsideRect.rect(
@@ -373,6 +372,8 @@
 
   function draw() {
     if (page === "game") {
+      if (objects.length == 1) page = "endGame";
+      context.clearRect(0, 0, canvas.width, canvas.height);
       for (let l of laser) {
         if (laser[0] !== undefined)
           if (!l.draw()) delete laser[laser.indexOf(l)];
@@ -380,8 +381,6 @@
           return element !== undefined;
         });
       }
-      if (objects.length == 1) page = "endGame";
-      context.clearRect(0, 0, canvas.width, canvas.height);
       for (let o of objects) {
         if (objects[0] !== undefined)
           if (o.draw()) delete objects[objects.indexOf(o)];
