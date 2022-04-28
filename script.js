@@ -87,8 +87,6 @@
     let isDestroyed = false;
     let health = 100;
     function draw() {
-      Matrix = drawPath(path, color, x, y, 12, alpha, health);
-      drawHealthBar(health, healthBarX, 12);
       if (FingerPos.x) {
         deltaPos.x = FingerPos.x - x;
         deltaPos.y = FingerPos.y - y;
@@ -97,6 +95,8 @@
         x += deltaPos.x;
         y += deltaPos.y;
       }
+      Matrix = drawPath(path, color, x, y, 12, alpha, health);
+      drawHealthBar(health, healthBarX, 12);
       isHitByLaser();
       return isDestroyed;
     }
@@ -176,7 +176,7 @@
         myFingers.length = 0;
         oldAngle = undefined;
         deltaAngle = undefined;
-        oldPos = {
+        FingerPos = {
           x: undefined,
           y: undefined,
         };
