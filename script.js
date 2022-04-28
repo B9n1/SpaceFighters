@@ -372,19 +372,19 @@
 
   function draw() {
     if (page === "game") {
+      for (let l of laser) {
+        if (laser[0] !== undefined)
+          if (!l.draw()) delete laser[laser.indexOf(l)];
+        laser = laser.filter(function (element) {
+          return element !== undefined;
+        });
+      }
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
       for (let o of objects) {
         if (objects[0] !== undefined)
           if (o.draw()) delete objects[objects.indexOf(o)];
         objects = objects.filter(function (element) {
-          return element !== undefined;
-        });
-      }
-      for (let l of laser) {
-        if (laser[0] !== undefined)
-          if (!l.draw()) delete laser[laser.indexOf(l)];
-        laser = laser.filter(function (element) {
           return element !== undefined;
         });
       }
