@@ -12,6 +12,11 @@
   const wallHealth = 30;
   let notTouched = true;
 
+  //Sounds
+  const shootSound = new Audio(
+    "/MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
+  );
+
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
@@ -113,8 +118,8 @@
       context.bezierCurveTo(1 / 3, -2 - 2 / 3, 1 + 2 / 3, -2 - 2 / 3, 2, -1);
       context.lineTo(0, 2);
       context.closePath();
-      if (i < health) context.fillStyle = "green";
-      else context.fillStyle = "red";
+      if (i < health) context.fillStyle = "red";
+      else context.fillStyle = "transparent";
       context.fill();
     }
 
@@ -122,9 +127,11 @@
   }
   function createSpaceShip(x, y, color, insideArray) {
     let myFingers = [];
+    let isShooting = false;
     let alpha = (Math.sign(canvas.width / 2 - x) * Math.PI) / 2;
     let oldAngle = undefined;
     let deltaAngle = undefined;
+    let timestampFormLastShoot = 0;
     let FingerPos = {
       x: undefined,
       y: undefined,
@@ -149,6 +156,13 @@
         x += deltaPos.x;
         y += deltaPos.y;
       }
+
+      if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
+        laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
+        shootSound.play();
+        timestampFormLastShoot = Date.now();
+      }
+
       Matrix = drawPath(path, color, x, y, 12, alpha, health);
       drawHealthBar(health, healthBarX, 12);
       isHitByLaser();
@@ -187,7 +201,7 @@
             identifier: touch.identifier,
           });
         if (myFingers.length > 2) {
-          laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
+          isShooting = true;
         }
         oldX = touch.clientX;
         oldY = touch.clientY;
@@ -224,7 +238,7 @@
     function reset() {
       if (myFingers.length > 2) {
         myFingers.splice(2);
-        shoot = false;
+        isShooting = false;
       } else {
         myFingers.length = 0;
         oldAngle = undefined;
