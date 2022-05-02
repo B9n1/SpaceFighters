@@ -16,6 +16,9 @@
   const shootSound = new Audio(
     "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
   );
+  const gameSound = new Audio(
+    "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3"
+  );
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
@@ -159,6 +162,7 @@
 
       if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
         laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
+        shootSound.load();
         shootSound.play();
         timestampFormLastShoot = Date.now();
       }
@@ -416,6 +420,8 @@
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
     notTouched = false;
+    if (page == "menu") {
+    }
     if (page === "endGame") window.location.reload(true);
     for (let touch of event.touches) {
       for (let o of objects) {
@@ -441,6 +447,53 @@
 
   function showGameControlls() {}
   function draw() {
+    if (page == "menu") {
+      context.save();
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.scale(12, 12);
+      context.lineWitdth = 6;
+      context.beginPath();
+      context.fillStyle = "white";
+      context.rect(-20, -20, 40, 40);
+      context.fill();
+      context.closePath();
+
+      context.beginPath();
+      context.font = "4px OldSchoolAdventures";
+      context.fillStyle = "Red";
+      let text = "Welcome";
+      context.fillText(text, -context.measureText(text).width / 2, -15);
+
+      context.font = "2px OldSchoolAdventures";
+      context.fillStyle = "green";
+      text = "(Click for Tutorial)";
+      context.fillText(text, -context.measureText(text).width / 2, -5);
+      context.rect(
+        -context.measureText(text).width / 2 - 3,
+        -context.measureText("M").width - 5 - 3,
+        context.measureText(text).width + 6,
+        context.measureText("M").width + 6
+      );
+      context.strokeStyle = "green";
+      context.stroke();
+      context.closePath();
+
+      context.beginPath();
+      context.font = "2px OldSchoolAdventures";
+      context.fillStyle = "orange";
+      text = "(Click to BATTLE)";
+      context.fillText(text, -context.measureText(text).width / 2, 10);
+      context.rect(
+        -context.measureText(text).width / 2 - 3,
+        -context.measureText("M").width + 10 - 3,
+        context.measureText(text).width + 6,
+        context.measureText("M").width + 6
+      );
+      context.strokeStyle = "orange";
+      context.stroke();
+      context.restore();
+      context.closePath();
+    }
     if (page === "game") {
       if (notTouched) showGameControlls();
       if (objects.length == 1) page = "endGame";
@@ -479,7 +532,7 @@
 
       context.fill();
 
-      context.font = "2px Arial";
+      context.font = "2px OldSchoolAdventures";
       context.fillStyle = "black";
       let text = "The Winner is";
       context.fillText(text, -context.measureText(text).width / 2, -2);
@@ -498,7 +551,8 @@
 
   function animate() {
     draw();
-
+    gameSound.loop = true;
+    gameSound.play();
     window.requestAnimationFrame(animate);
   }
   animate();
