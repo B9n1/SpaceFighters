@@ -14,7 +14,7 @@
 
   //Sounds
   const shootSound = new Audio(
-    "/MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
+    "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
   );
 
   //////////////////////////////////////////////////////////////////////////////////
