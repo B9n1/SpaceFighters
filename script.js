@@ -11,7 +11,7 @@
   const spaceShipHealth = 10;
   const wallHealth = 30;
   let notTouched = true;
-
+  let firsttimeloading = true;
   //Sounds
   const shootSound = new Audio(
     "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
@@ -419,6 +419,17 @@
   //////////////////////////////////////////////////////////////////////////////////
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
+    // Load Sounds for Safari
+    if (firsttimeloading) {
+      shootSound.play();
+      shootSound.pause();
+      shootSound.currentTime = 0;
+      gameSound.play();
+      gameSound.pause();
+      gameSound.currentTime = 0;
+      firsttimeloading = false;
+    }
+
     notTouched = false;
     if (page == "menu") {
     }
