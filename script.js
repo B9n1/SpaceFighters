@@ -2,7 +2,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Globale Varibals /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  let page = "game";
+  let page = "menu";
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
@@ -13,12 +13,8 @@
   let notTouched = true;
   let firsttimeloading = true;
   //Sounds
-  const shootSound = new Audio(
-    "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
-  );
-  const gameSound = new Audio(
-    "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3"
-  );
+  //const shootSound = new Audio( "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"  );
+  //const gameSound = new Audio(  "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3");
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
@@ -162,8 +158,8 @@
 
       if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
         laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
-        shootSound.load();
-        shootSound.play();
+        //shootSound.load();
+        //shootSound.play();
         timestampFormLastShoot = Date.now();
       }
 
@@ -384,13 +380,59 @@
     }
     return { draw };
   }
+  //////////////////////////////////////////////////////////////////////////////////
+  /////////// Buttons /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
 
+  function createButton(y, color, text, value) {
+    let Matrix;
+    let button = new Path2D();
+
+    function draw() {
+      button.rect(
+        -context.measureText(text).width / 2 - 3,
+        -context.measureText("M").width + y - 3,
+        context.measureText(text).width + 6,
+        context.measureText("M").width + 6
+      );
+      button.closePath();
+
+      context.beginPath();
+      context.fillStyle = "transperant";
+      context.font = "2px OldSchoolAdventures";
+      context.fillStyle = color;
+      text = text;
+      context.fillText(text, -context.measureText(text).width / 2, y);
+      context.rect(
+        -context.measureText(text).width / 2 - 3,
+        -context.measureText("M").width + y - 3,
+        context.measureText(text).width + 6,
+        context.measureText("M").width + 6
+      );
+      context.strokeStyle = color;
+      context.stroke();
+      Matrix = context.getTransform();
+      context.closePath();
+    }
+    function isInside(x, y) {
+      let localMatrix = DOMMatrix.fromMatrix(Matrix);
+      localMatrix.invertSelf();
+      let myDOMPoint = localMatrix.transformPoint(new DOMPoint(x, y));
+
+      if (context.isPointInPath(button, myDOMPoint.x, myDOMPoint.y))
+        page = value;
+    }
+    return { draw, isInside };
+  }
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Objects /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
   let objects = [];
   let laser = [];
   let walls = [];
+  let buttons = [];
+  buttons.push(createButton(-5, "green", "(Click for Tutorial)", "tutorial"));
+  buttons.push(createButton(10, "orange", "(Click to BATTLE)", "game"));
   walls.push(createWall((canvas.width * 1) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 2) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 1) / 3, (canvas.height * 3) / 4));
@@ -420,7 +462,9 @@
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
     // Load Sounds for Safari
-    if (firsttimeloading) {
+    /*
+    if (false) {
+      //firsttimeloading
       shootSound.play();
       shootSound.pause();
       shootSound.currentTime = 0;
@@ -429,30 +473,38 @@
       gameSound.currentTime = 0;
       firsttimeloading = false;
     }
-
+    */
     notTouched = false;
-    if (page == "menu") {
+    if (page === "menu") {
+      for (let b of buttons) {
+        b.isInside(event.touches[0].clientX, event.touches[0].clientY);
+      }
     }
     if (page === "endGame") window.location.reload(true);
-    for (let touch of event.touches) {
-      for (let o of objects) {
-        o.isInside(touch);
+    if (page === "game") {
+      for (let touch of event.touches) {
+        for (let o of objects) {
+          o.isInside(touch);
+        }
       }
     }
   });
   canvas.addEventListener("touchmove", (event) => {
     event.preventDefault();
-    for (let touch of event.touches) {
-      for (let o of objects) {
-        o.moveTo(touch);
+    if (page === "game") {
+      for (let touch of event.touches) {
+        for (let o of objects) {
+          o.moveTo(touch);
+        }
       }
     }
   });
   canvas.addEventListener("touchend", (event) => {
     event.preventDefault();
-
-    for (let o of objects) {
-      o.reset();
+    if (page === "game") {
+      for (let o of objects) {
+        o.reset();
+      }
     }
   });
 
@@ -474,36 +526,12 @@
       context.fillStyle = "Red";
       let text = "Welcome";
       context.fillText(text, -context.measureText(text).width / 2, -15);
-
-      context.font = "2px OldSchoolAdventures";
-      context.fillStyle = "green";
-      text = "(Click for Tutorial)";
-      context.fillText(text, -context.measureText(text).width / 2, -5);
-      context.rect(
-        -context.measureText(text).width / 2 - 3,
-        -context.measureText("M").width - 5 - 3,
-        context.measureText(text).width + 6,
-        context.measureText("M").width + 6
-      );
-      context.strokeStyle = "green";
-      context.stroke();
       context.closePath();
 
-      context.beginPath();
-      context.font = "2px OldSchoolAdventures";
-      context.fillStyle = "orange";
-      text = "(Click to BATTLE)";
-      context.fillText(text, -context.measureText(text).width / 2, 10);
-      context.rect(
-        -context.measureText(text).width / 2 - 3,
-        -context.measureText("M").width + 10 - 3,
-        context.measureText(text).width + 6,
-        context.measureText("M").width + 6
-      );
-      context.strokeStyle = "orange";
-      context.stroke();
+      for (let b of buttons) {
+        b.draw();
+      }
       context.restore();
-      context.closePath();
     }
     if (page === "game") {
       if (notTouched) showGameControlls();
@@ -553,8 +581,10 @@
       context.fillStyle = objects[0].color;
       context.fillText(text, -context.measureText(text).width / 2, 2);
       context.fillStyle = "orange";
-      text = "(Click to Repeat)";
+      text = "(Click to return";
       context.fillText(text, -context.measureText(text).width / 2, 8);
+      text = " to the Menu)";
+      context.fillText(text, -context.measureText(text).width / 2, 12);
       context.restore();
       context.closePath();
     }
@@ -562,8 +592,8 @@
 
   function animate() {
     draw();
-    gameSound.loop = true;
-    gameSound.play();
+    //gameSound.loop = true;
+    //gameSound.play();
     window.requestAnimationFrame(animate);
   }
   animate();
