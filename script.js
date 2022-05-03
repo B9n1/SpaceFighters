@@ -10,7 +10,6 @@
   const laserDamge = 1;
   const spaceShipHealth = 10;
   const wallHealth = 30;
-  let notTouched = true;
   let firsttimeloading = true;
   //Sounds
   //const shootSound = new Audio( "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"  );
@@ -178,6 +177,18 @@
         }
       }
     }
+    function TouchIsInsideSpaceShip(touch) {
+      let isInsideRect = new Path2D();
+      isInsideRect.rect(
+        insideArray[0],
+        insideArray[1],
+        insideArray[2],
+        insideArray[3]
+      );
+      context.closePath();
+      //Merken die Possition des Fingers merk
+      return context.isPointInPath(isInsideRect, touch.clientX, touch.clientY);
+    }
     function isInside(touch) {
       let isInsideRect = new Path2D();
       isInsideRect.rect(
@@ -189,7 +200,7 @@
       context.closePath();
       //Merken die Possition des Fingers merk
 
-      if (context.isPointInPath(isInsideRect, touch.clientX, touch.clientY)) {
+      if (TouchIsInsideSpaceShip(touch)) {
         let allIdentifer = [];
         if (myFingers.length > 0)
           for (let i of myFingers) allIdentifer.push(i.identifier);
@@ -340,22 +351,45 @@
     wall.closePath();
     return wall;
   }
-  function createCracks() {}
+  function createWallCracks() {
+    let crack = new Path2D();
+    crack.moveTo(0, 0);
+    crack.lineTo(1, 0);
+    crack.lineTo(2, 2);
+    crack.lineTo(0.5, 4);
+    crack.lineTo(1, 5);
+    crack.lineTo(0, 4);
+    crack.lineTo(1, 2);
+    crack.lineTo(0, 0);
+    crack.closePath();
+    return crack;
+  }
+
   function drawWall(wpath, x, y, scale, health) {
     context.save();
     context.translate(x, y);
     context.rotate(Math.PI / 2);
     context.scale(scale, scale);
-    context.lineWitdth = 6;
-    context.strokeStyle = "white";
     context.fillStyle = "grey";
     context.fill(wpath);
 
-    context.font = "2px Arial";
-    context.fillStyle = "white";
-    context.fillText(health, -2, 1);
     //Matrix
     let Matrix = context.getTransform();
+    context.restore();
+    context.save();
+    context.translate(x, y);
+    context.rotate(Math.PI / 2);
+    context.scale(scale / 5, scale / 5);
+    context.translate(-5 * 8, 0);
+
+    for (let i = 0; i < wallHealth; i++) {
+      context.rotate(Math.PI);
+      if (i % 2 == 0) context.translate(-5, 0);
+      if (wallHealth - health > i) context.fillStyle = "black";
+      else context.fillStyle = "transparent";
+      context.fill(createWallCracks());
+    }
+
     context.restore();
     return Matrix;
   }
@@ -398,7 +432,7 @@
       button.closePath();
 
       context.beginPath();
-      context.fillStyle = "transperant";
+      context.fillStyle = "transparent";
       context.font = "2px OldSchoolAdventures";
       context.fillStyle = color;
       text = text;
@@ -474,14 +508,14 @@
       firsttimeloading = false;
     }
     */
-    notTouched = false;
+
     if (page === "menu") {
       for (let b of buttons) {
         b.isInside(event.touches[0].clientX, event.touches[0].clientY);
       }
     }
     if (page === "endGame") window.location.reload(true);
-    if (page === "game") {
+    if (page === "game" || page === "tutorial") {
       for (let touch of event.touches) {
         for (let o of objects) {
           o.isInside(touch);
@@ -491,7 +525,8 @@
   });
   canvas.addEventListener("touchmove", (event) => {
     event.preventDefault();
-    if (page === "game") {
+
+    if (page === "game" || page === "tutorial") {
       for (let touch of event.touches) {
         for (let o of objects) {
           o.moveTo(touch);
@@ -501,16 +536,55 @@
   });
   canvas.addEventListener("touchend", (event) => {
     event.preventDefault();
-    if (page === "game") {
+    if (page === "game" || page === "tutorial") {
       for (let o of objects) {
         o.reset();
       }
     }
   });
 
-  function showGameControlls() {}
   function draw() {
-    if (page == "menu") {
+    if (page === "tutorial") {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.save();
+      context.translate(canvas.width / 2, 0);
+
+      context.beginPath();
+      context.fillStyle = "white";
+      context.rect(0, 0, canvas.width / 2, canvas.height);
+
+      context.fill();
+      context.font = canvas.width / 64 + "px OldSchoolAdventures";
+      context.fillStyle = "black";
+      let text = "<- Your Healthbar, which show your current health";
+      context.fillText(text, 0, canvas.height / 20, canvas.width / 2);
+      text = "<- These are walls the you or your enemies can hied";
+      context.fillText(text, 0, (canvas.height * 1) / 4, canvas.width / 2);
+      text =
+        "        The walls can take " +
+        wallHealth +
+        " shots befor they get destroyed";
+      context.fillText(
+        text,
+        0,
+        (canvas.height * 1) / 4 + context.measureText("M").width,
+        canvas.width / 2
+      );
+
+      context.closePath();
+      context.restore();
+      for (let l of laser) {
+        if (laser[0] !== undefined)
+          if (!l.draw()) delete laser[laser.indexOf(l)];
+        laser = laser.filter(function (element) {
+          return element !== undefined;
+        });
+      }
+      objects[0].draw();
+      walls[0].draw();
+      walls[2].draw();
+    }
+    if (page === "menu") {
       context.save();
       context.translate(canvas.width / 2, canvas.height / 2);
       context.scale(12, 12);
@@ -534,7 +608,6 @@
       context.restore();
     }
     if (page === "game") {
-      if (notTouched) showGameControlls();
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
       for (let l of laser) {
