@@ -2,7 +2,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Globale Varibals /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  let page = "game";
+  let page = "menu";
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
@@ -13,12 +13,10 @@
   let firsttimeloading = true;
   let globalScale = 12;
   //Sounds
-  let shootSound = new Audio(
-    "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
-  );
-  let gameSound = new Audio(
-    "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3"
-  );
+  let shootSound = new Audio("MusicAndSounds/Shot.wav");
+  let hitSound = new Audio("MusicAndSounds/Hit.wav");
+  let gameSound = new Audio("MusicAndSounds/GameMusic.mp3");
+  let destroyedSound = new Audio("MusicAndSounds/Destroid.mp3");
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
@@ -185,12 +183,15 @@
     context.restore();
   }
   function drawBorder(x, y, color, scale) {
-    let sign = Math.sign(canvas.width / 2 - x) * 1;
     context.beginPath();
-    context.fillStyle = color + "11";
+    context.strokeStyle = color + "aa";
     context.lineWidth = scale;
-    context.rect(x, y, canvas.width / 2, canvas.height);
-    context.fill();
+    context.strokeRect(
+      x + scale / 2,
+      y + scale / 2,
+      canvas.width / 2 - scale,
+      canvas.height - scale
+    );
     context.closePath();
   }
   function createSpaceShip(x, y, color, insideArray) {
@@ -246,7 +247,13 @@
       for (let l of laser) {
         if (l.didItHit(path, Matrix, color)) {
           health -= laserDamge;
-          if (health <= 0) isDestroyed = true;
+          hitSound.load();
+          hitSound.play();
+          if (health <= 0) {
+            isDestroyed = true;
+            destroyedSound.load();
+            destroyedSound.play();
+          }
         }
       }
     }
@@ -619,6 +626,14 @@
       shootSound.play();
       shootSound.pause();
       shootSound.currentTime = 0;
+
+      hitSound.play();
+      hitSound.pause();
+      hitSound.currentTime = 0;
+
+      destroyedSound.play();
+      destroyedSound.pause();
+      destroyedSound.currentTime = 0;
 
       gameSound.play();
       gameSound.pause();
