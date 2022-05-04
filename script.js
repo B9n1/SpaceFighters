@@ -12,8 +12,12 @@
   const wallHealth = 30;
   let firsttimeloading = true;
   //Sounds
-  //const shootSound = new Audio( "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"  );
-  //const gameSound = new Audio(  "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3");
+  const shootSound = new Audio(
+    "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
+  );
+  let gameSound = new Audio(
+    "2021-08-30_-_Boss_Time_-_www.FesliyanStudios.com.mp3"
+  );
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
@@ -157,8 +161,8 @@
 
       if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
         laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
-        //shootSound.load();
-        //shootSound.play();
+        shootSound.load();
+        shootSound.play();
         timestampFormLastShoot = Date.now();
       }
 
@@ -246,22 +250,26 @@
         }
       }
     }
-    function reset() {
-      if (myFingers.length > 2) {
-        myFingers.splice(2);
-        isShooting = false;
-      } else {
-        myFingers.length = 0;
-        oldAngle = undefined;
-        deltaAngle = undefined;
-        FingerPos = {
-          x: undefined,
-          y: undefined,
-        };
-        deltaPos = {
-          x: undefined,
-          y: undefined,
-        };
+    function reset(deletedFingerIdentifier) {
+      for (let f of myFingers) {
+        if (f.identifier === deletedFingerIdentifier) {
+          if (myFingers.length > 2) {
+            myFingers.splice(2);
+            isShooting = false;
+          } else {
+            myFingers.length = 0;
+            oldAngle = undefined;
+            deltaAngle = undefined;
+            FingerPos = {
+              x: undefined,
+              y: undefined,
+            };
+            deltaPos = {
+              x: undefined,
+              y: undefined,
+            };
+          }
+        }
       }
     }
     return {
@@ -493,21 +501,23 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Touch Events /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
+  let touchesIdentifier = [];
+
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
     // Load Sounds for Safari
-    /*
-    if (false) {
-      //firsttimeloading
+
+    if (firsttimeloading) {
       shootSound.play();
       shootSound.pause();
       shootSound.currentTime = 0;
+      shootSound.preload = false;
       gameSound.play();
       gameSound.pause();
       gameSound.currentTime = 0;
+      gameSound.volume = 0.5;
       firsttimeloading = false;
     }
-    */
 
     if (page === "menu") {
       for (let b of buttons) {
@@ -517,6 +527,7 @@
     if (page === "endGame") window.location.reload(true);
     if (page === "game" || page === "tutorial") {
       for (let touch of event.touches) {
+        touchesIdentifier.push(touch.identifier);
         for (let o of objects) {
           o.isInside(touch);
         }
@@ -536,9 +547,15 @@
   });
   canvas.addEventListener("touchend", (event) => {
     event.preventDefault();
+
     if (page === "game" || page === "tutorial") {
-      for (let o of objects) {
-        o.reset();
+      let temp = [];
+      for (let touch of event.touches) temp.push(touch.identifier);
+      let difference = touchesIdentifier.filter((x) => !temp.includes(x));
+      for (let d of difference) {
+        for (let o of objects) {
+          o.reset(d);
+        }
       }
     }
   });
@@ -558,18 +575,21 @@
       context.fillStyle = "black";
       let text = "<- Your Healthbar, which show your current health";
       context.fillText(text, 0, canvas.height / 20, canvas.width / 2);
-      text = "<- These are walls the you or your enemies can hied";
+      text = "<- These are walls, where you or your enemies can hied";
       context.fillText(text, 0, (canvas.height * 1) / 4, canvas.width / 2);
       text =
         "        The walls can take " +
         wallHealth +
-        " shots befor they get destroyed";
+        " shots by YOU or YOUR ENEMY befor they get destroyed.";
       context.fillText(
         text,
         0,
         (canvas.height * 1) / 4 + context.measureText("M").width,
         canvas.width / 2
       );
+      text =
+        "<- These are SpaceShips, they move to the Point between the your first two Fingers with a certen Speed. You can change the angle of the SpaceShip with the";
+      context.fillText(text, 0, canvas.height / 2, canvas.width / 2);
 
       context.closePath();
       context.restore();
@@ -608,6 +628,8 @@
       context.restore();
     }
     if (page === "game") {
+      gameSound.loop = true;
+      gameSound.play();
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
       for (let l of laser) {
@@ -665,8 +687,7 @@
 
   function animate() {
     draw();
-    //gameSound.loop = true;
-    //gameSound.play();
+
     window.requestAnimationFrame(animate);
   }
   animate();
