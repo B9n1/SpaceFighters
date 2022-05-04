@@ -2,8 +2,24 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Globale Varibals /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
+
   let page = "menu";
-  console.log(navigator);
+  // function to detect if is iOS to prevent the lags true audio
+  function iOS() {
+    return (
+      [
+        "iPad Simulator",
+        "iPhone Simulator",
+        "iPod Simulator",
+        "iPad",
+        "iPhone",
+        "iPod",
+      ].includes(navigator.platform) ||
+      // iPad on iOS 13 detection
+      (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    );
+  }
+
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
@@ -232,13 +248,14 @@
       if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
         laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
         shootSound.load();
-        shootSound.play();
+        if (!iOS()) shootSound.play();
         timestampFormLastShoot = Date.now();
       }
 
       Matrix = drawPath(path, color, x, y, globalScale, alpha, health);
       drawHealthBar(health, healthBarX, globalScale);
-      drawBorder(insideArray[0], insideArray[1], color, globalScale);
+      if (page === "game")
+        drawBorder(insideArray[0], insideArray[1], color, globalScale);
       isHitByLaser();
       return isDestroyed;
     }
@@ -249,7 +266,7 @@
         if (l.didItHit(path, Matrix, color)) {
           health -= laserDamge;
           hitSound.load();
-          hitSound.play();
+          if (!iOS()) hitSound.play();
           if (health <= 0) {
             isDestroyed = true;
             destroyedSound.load();
@@ -478,7 +495,7 @@
     let isDestroyed = false;
 
     function draw() {
-      Matrix = drawWall(wallPath, x, y, 12, health);
+      Matrix = drawWall(wallPath, x, y, globalScale, health);
       isHitByLaser();
       return isDestroyed;
     }
@@ -562,12 +579,11 @@
     let Matrix;
 
     function draw() {
-      Matrix = drawTutorialObject(ObjectPath, x, y, 12);
+      Matrix = drawTutorialObject(ObjectPath, x, y, globalScale);
       isHitByLaser();
     }
     function isHitByLaser() {
       for (let l of laser) {
-        console.log("?");
         if (l.didItHit(ObjectPath, Matrix)) {
           window.location.reload(true);
         }
@@ -781,7 +797,7 @@
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.save();
       context.translate(canvas.width / 2, canvas.height / 2);
-      context.scale(12, 12);
+      context.scale(globalScale, globalScale);
       context.lineWitdth = 6;
       context.beginPath();
       context.fillStyle = "white";
@@ -790,9 +806,18 @@
       context.closePath();
 
       context.beginPath();
-      context.font = "4px OldSchoolAdventures";
-      context.fillStyle = "Red";
-      let text = "Welcome";
+      context.font = "3px OldSchoolAdventures";
+
+      let text = "SpaceFighters";
+      var gradient = context.createLinearGradient(
+        0,
+        0,
+        context.measureText(text).width,
+        0
+      );
+      gradient.addColorStop(0, "#A91F1F");
+      gradient.addColorStop(0.2, "#379A9A");
+      context.fillStyle = gradient;
       context.fillText(text, -context.measureText(text).width / 2, -15);
       context.closePath();
 
@@ -833,8 +858,8 @@
     if (page === "endGame") {
       context.save();
       context.translate(canvas.width / 2, canvas.height / 2);
-      context.scale(12, 12);
-      context.lineWitdth = 6;
+      context.scale(globalScale, globalScale);
+      context.lineWitdth = globalScale / 2;
       context.beginPath();
       context.fillStyle = "white";
       context.rect(-20, -20, 40, 40);
@@ -854,7 +879,7 @@
       text = "(Click to return";
       context.fillText(text, -context.measureText(text).width / 2, 8);
       text = " to the Menu)";
-      context.fillText(text, -context.measureText(text).width / 2, 12);
+      context.fillText(text, -context.measureText(text).width / 2, globalScale);
       context.restore();
       context.closePath();
     }
