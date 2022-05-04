@@ -32,6 +32,7 @@
   //Sounds
   let shootSound = new Audio("MusicAndSounds/Shot.wav");
   let hitSound = new Audio("MusicAndSounds/Hit.wav");
+  let hitWallSound = new Audio("MusicAndSounds/hitWall.wav");
   let gameSound = new Audio("MusicAndSounds/GameMusic.mp3");
   let destroyedSound = new Audio("MusicAndSounds/ShipDestroyed.wav");
 
@@ -503,6 +504,8 @@
       for (let l of laser) {
         if (l.didItHit(wallPath, Matrix)) {
           health -= laserDamge;
+          hitWallSound.load();
+          if (!iOS()) hitWallSound.play();
           if (health <= 0) isDestroyed = true;
         }
       }
@@ -648,6 +651,10 @@
       hitSound.pause();
       hitSound.currentTime = 0;
 
+      hitWallSound.play();
+      hitWallSound.pause();
+      hitWallSound.currentTime = 0;
+
       destroyedSound.play();
       destroyedSound.pause();
       destroyedSound.currentTime = 0;
@@ -743,10 +750,12 @@
         canvas.width / 2,
         canvas.width / 64,
         "black",
-        "<- Your Healthbar, which show your current health." +
+        "<- Your Healthbar, which shows your current health." +
           " Every Player starts with " +
           spaceShipHealth +
-          " health."
+          " health, represented by " +
+          spaceShipHealth +
+          " harts."
       );
 
       addTextBox(
@@ -757,7 +766,7 @@
         "black",
         "<- These are walls, where you or your enemies can hide. The wall can take " +
           wallHealth +
-          " shots by YOU or YOUR ENEMY befor geting destroyed."
+          " shots by YOU or YOUR ENEMY before getting destroyed."
       );
 
       addTextBox(
@@ -766,7 +775,7 @@
         canvas.width / 2,
         canvas.width / 64,
         "black",
-        "<- These is a SpaceShips. They move to the Point between the your first two Fingers place in your own half, with a certen Speed. You can change the angle of the SpaceShip with the Rotation of your both first two fingers. You can shoot Laser by touching your half with a 3rd Finger."
+        "<- This is a SpaceShip. SpaceShips move to the Point between your first 2 placed Fingers, in your own half.  The SpaceShip self has a max Speed. You can change the angle of the SpaceShip with the rotation of your both first 2 Fingers. You can shoot Laser by touching your half with a 3rd Finger."
       );
       addTextBox(
         0,
