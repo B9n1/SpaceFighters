@@ -12,7 +12,7 @@
   const wallHealth = 30;
   let firsttimeloading = true;
   //Sounds
-  const shootSound = new Audio(
+  let shootSound = new Audio(
     "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
   );
   let gameSound = new Audio(
@@ -393,7 +393,7 @@
     for (let i = 0; i < wallHealth; i++) {
       context.rotate(Math.PI);
       if (i % 2 == 0) context.translate(-5, 0);
-      if (wallHealth - health > i) context.fillStyle = "black";
+      if (wallHealth - health > i) context.fillStyle = "#3d3d3d";
       else context.fillStyle = "transparent";
       context.fill(createWallCracks());
     }
@@ -426,7 +426,7 @@
   /////////// Buttons /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
 
-  function createButton(y, color, text, value) {
+  function createButton(y, color, text, value, x = 0) {
     let Matrix;
     let button = new Path2D();
 
@@ -473,8 +473,18 @@
   let laser = [];
   let walls = [];
   let buttons = [];
+  let tutorialButtons = [];
   buttons.push(createButton(-5, "green", "(Click for Tutorial)", "tutorial"));
   buttons.push(createButton(10, "orange", "(Click to BATTLE)", "game"));
+  tutorialButtons.push(
+    createButton(
+      (canvas.height * 3) / 4 / 12,
+      "orange",
+      "(Return to Menu)",
+      "endGame"
+    )
+  );
+
   walls.push(createWall((canvas.width * 1) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 2) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 1) / 3, (canvas.height * 3) / 4));
@@ -511,7 +521,7 @@
       shootSound.play();
       shootSound.pause();
       shootSound.currentTime = 0;
-      shootSound.preload = false;
+
       gameSound.play();
       gameSound.pause();
       gameSound.currentTime = 0;
@@ -591,6 +601,11 @@
         "<- These are SpaceShips, they move to the Point between the your first two Fingers with a certen Speed. You can change the angle of the SpaceShip with the";
       context.fillText(text, 0, canvas.height / 2, canvas.width / 2);
 
+      context.scale(12, 12);
+      for (let b of tutorialButtons) {
+        b.draw();
+      }
+
       context.closePath();
       context.restore();
       for (let l of laser) {
@@ -630,6 +645,7 @@
     if (page === "game") {
       gameSound.loop = true;
       gameSound.play();
+
       if (objects.length == 1) page = "endGame";
       context.clearRect(0, 0, canvas.width, canvas.height);
       for (let l of laser) {
@@ -687,7 +703,6 @@
 
   function animate() {
     draw();
-
     window.requestAnimationFrame(animate);
   }
   animate();
