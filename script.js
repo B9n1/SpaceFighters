@@ -3,6 +3,7 @@
   /////////// Globale Varibals /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
   let page = "menu";
+  console.log(navigator);
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
@@ -16,7 +17,7 @@
   let shootSound = new Audio("MusicAndSounds/Shot.wav");
   let hitSound = new Audio("MusicAndSounds/Hit.wav");
   let gameSound = new Audio("MusicAndSounds/GameMusic.mp3");
-  let destroyedSound = new Audio("MusicAndSounds/ShipDestroyed.mp3");
+  let destroyedSound = new Audio("MusicAndSounds/ShipDestroyed.wav");
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
