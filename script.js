@@ -432,7 +432,7 @@
 
     function draw() {
       button.rect(
-        -context.measureText(text).width / 2 - 3,
+        -context.measureText(text).width / 2 - 3 + x,
         -context.measureText("M").width + y - 3,
         context.measureText(text).width + 6,
         context.measureText("M").width + 6
@@ -444,9 +444,9 @@
       context.font = "2px OldSchoolAdventures";
       context.fillStyle = color;
       text = text;
-      context.fillText(text, -context.measureText(text).width / 2, y);
+      context.fillText(text, -context.measureText(text).width / 2 + x, y);
       context.rect(
-        -context.measureText(text).width / 2 - 3,
+        -context.measureText(text).width / 2 - 3 + x,
         -context.measureText("M").width + y - 3,
         context.measureText(text).width + 6,
         context.measureText("M").width + 6
@@ -467,24 +467,57 @@
     return { draw, isInside };
   }
   //////////////////////////////////////////////////////////////////////////////////
+  /////////// Tutorial Object /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
+  function tutorialObjectPath() {
+    const tutorialObject = new Path2D();
+    tutorialObject.arc(0, 0, 4, 0, 2 * Math.PI);
+    tutorialObject.closePath();
+    return tutorialObject;
+  }
+  function drawTutorialObject(path, x, y, scale) {
+    context.save();
+    context.translate(x, y);
+    context.scale(scale, scale);
+    context.fillStyle = "red";
+    context.fill(path);
+
+    //Matrix
+    let Matrix = context.getTransform();
+    context.restore();
+    return Matrix;
+  }
+  function createTutorialObject(x, y) {
+    const ObjectPath = tutorialObjectPath();
+    let Matrix;
+
+    function draw() {
+      Matrix = drawTutorialObject(ObjectPath, x, y, 12);
+      isHitByLaser();
+    }
+    function isHitByLaser() {
+      for (let l of laser) {
+        console.log("?");
+        if (l.didItHit(ObjectPath, Matrix)) {
+          window.location.reload(true);
+        }
+      }
+    }
+    return { draw };
+  }
+  //////////////////////////////////////////////////////////////////////////////////
   /////////// Objects /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
   let objects = [];
   let laser = [];
   let walls = [];
   let buttons = [];
-  let tutorialButtons = [];
+  let tutorialObjects = [];
   buttons.push(createButton(-5, "green", "(Click for Tutorial)", "tutorial"));
-  buttons.push(createButton(10, "orange", "(Click to BATTLE)", "game"));
-  tutorialButtons.push(
-    createButton(
-      (canvas.height * 3) / 4 / 12,
-      "orange",
-      "(Return to Menu)",
-      "endGame"
-    )
+  buttons.push(createButton(10, "orange", "  (Click for Battle)  ", "game"));
+  tutorialObjects.push(
+    createTutorialObject(canvas.width * 0.9, canvas.height * 0.9)
   );
-
   walls.push(createWall((canvas.width * 1) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 2) / 3, canvas.height / 4));
   walls.push(createWall((canvas.width * 1) / 3, (canvas.height * 3) / 4));
@@ -507,6 +540,9 @@
       context.canvas.height,
     ])
   );
+  //////////////////////////////////////////////////////////////////////////////////
+  /////////// Pages /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Touch Events /////////////////////////////////////////////////////////
@@ -570,44 +606,84 @@
     }
   });
 
+  function addTextBox(x, y, maxWidth, lineHeight, color, text) {
+    context.font = lineHeight + "px OldSchoolAdventures";
+
+    let words = text.split(" ");
+    context.fillStyle = color;
+    let line = "";
+    for (let w = 0; w < words.length; w++) {
+      if (
+        context.measureText(line).width +
+          context.measureText(words[w] + " ").width <
+        maxWidth
+      ) {
+        line += words[w] + " ";
+      } else {
+        context.fillText(line, x, y);
+        y += context.measureText("M").width * 1.5;
+        line = words[w] + " ";
+      }
+      if (w === words.length - 1) {
+        context.fillText(line, x, y);
+      }
+    }
+  }
   function draw() {
     if (page === "tutorial") {
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.save();
       context.translate(canvas.width / 2, 0);
-
       context.beginPath();
       context.fillStyle = "white";
-      context.rect(0, 0, canvas.width / 2, canvas.height);
-
+      context.rect(-canvas.width * 0.02, 0, canvas.width * 1.02, canvas.height);
       context.fill();
-      context.font = canvas.width / 64 + "px OldSchoolAdventures";
-      context.fillStyle = "black";
-      let text = "<- Your Healthbar, which show your current health";
-      context.fillText(text, 0, canvas.height / 20, canvas.width / 2);
-      text = "<- These are walls, where you or your enemies can hied";
-      context.fillText(text, 0, (canvas.height * 1) / 4, canvas.width / 2);
-      text =
-        "        The walls can take " +
-        wallHealth +
-        " shots by YOU or YOUR ENEMY befor they get destroyed.";
-      context.fillText(
-        text,
-        0,
-        (canvas.height * 1) / 4 + context.measureText("M").width,
-        canvas.width / 2
-      );
-      text =
-        "<- These are SpaceShips, they move to the Point between the your first two Fingers with a certen Speed. You can change the angle of the SpaceShip with the";
-      context.fillText(text, 0, canvas.height / 2, canvas.width / 2);
-
-      context.scale(12, 12);
-      for (let b of tutorialButtons) {
-        b.draw();
-      }
-
       context.closePath();
+      context.beginPath();
+      context.fillStyle = "red";
+      context.font = "20px Georgia";
+
+      addTextBox(
+        0,
+        canvas.height * 0.05,
+        canvas.width / 2,
+        canvas.width / 64,
+        "black",
+        "<- Your Healthbar, which show your current health." +
+          " Every Player starts with " +
+          spaceShipHealth +
+          " health"
+      );
+
+      addTextBox(
+        0,
+        canvas.height / 4,
+        canvas.width / 2,
+        canvas.width / 64,
+        "black",
+        "<- These are walls, where you or your enemies can hied. The wall can take " +
+          wallHealth +
+          " shots by YOU or YOUR ENEMY befor geting destroyed."
+      );
+
+      addTextBox(
+        0,
+        canvas.height / 2,
+        canvas.width / 2,
+        canvas.width / 64,
+        "black",
+        "<- These is a SpaceShips. They move to the Point between the your first two you place in your own half Fingers with a certen Speed. You can change the angle of the SpaceShip with the Rotation of your both first two fingers. You can shoot Laser by touching your half with a 3rd Finger."
+      );
+      addTextBox(
+        0,
+        canvas.height * 0.9,
+        canvas.width * 0.3,
+        canvas.width / 64,
+        "red",
+        "Shoot the RED circle to return to the Menu"
+      );
       context.restore();
+
       for (let l of laser) {
         if (laser[0] !== undefined)
           if (!l.draw()) delete laser[laser.indexOf(l)];
@@ -615,11 +691,16 @@
           return element !== undefined;
         });
       }
+
+      for (let o of tutorialObjects) {
+        o.draw();
+      }
       objects[0].draw();
       walls[0].draw();
       walls[2].draw();
     }
     if (page === "menu") {
+      context.clearRect(0, 0, canvas.width, canvas.height);
       context.save();
       context.translate(canvas.width / 2, canvas.height / 2);
       context.scale(12, 12);
