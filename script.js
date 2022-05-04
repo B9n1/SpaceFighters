@@ -16,7 +16,7 @@
   let shootSound = new Audio("MusicAndSounds/Shot.wav");
   let hitSound = new Audio("MusicAndSounds/Hit.wav");
   let gameSound = new Audio("MusicAndSounds/GameMusic.mp3");
-  let destroyedSound = new Audio("MusicAndSounds/Destroid.mp3");
+  let destroyedSound = new Audio("MusicAndSounds/ShipDestroyed.mp3");
 
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
