@@ -2,7 +2,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Globale Varibals /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  let page = "menu";
+  let page = "game";
   let canvas = document.getElementById("canvas01");
   let context = canvas.getContext("2d");
   context.canvas.width = window.innerWidth;
@@ -11,6 +11,7 @@
   const spaceShipHealth = 10;
   const wallHealth = 30;
   let firsttimeloading = true;
+  let globalScale = 12;
   //Sounds
   let shootSound = new Audio(
     "MusicAndSounds/mixkit-short-laser-gun-shot-1670.wav"
@@ -65,6 +66,14 @@
     context.lineTo(-2, 6);
     context.fill();
     context.closePath();
+    context.beginPath();
+    context.fillStyle = "yellow";
+    context.moveTo(-1, 7);
+    context.bezierCurveTo(-0.5, 5.5, 0.5, 5.5, 1, 7);
+    context.lineTo(0, 10);
+    context.lineTo(-1, 7);
+    context.fill();
+    context.closePath();
     // right Flame
     context.beginPath();
     context.fillStyle = "red";
@@ -72,6 +81,14 @@
     context.bezierCurveTo(9 + 1 / 3, 2, 9 + 2 / 3, 2, 10, 2.5);
     context.lineTo(9.5, 5);
     context.lineTo(9, 2.5);
+    context.fill();
+    context.closePath();
+    context.beginPath();
+    context.fillStyle = "yellow";
+    context.moveTo(9.4, 2.5);
+    context.bezierCurveTo(9.5, 3, 9.5, 3, 9.6, 2.5);
+    context.lineTo(9.5, 4);
+    context.lineTo(9.4, 2.5);
     context.fill();
     context.closePath();
     //  left Flame
@@ -83,8 +100,48 @@
     context.lineTo(-9, 2.5);
     context.fill();
     context.closePath();
+    context.beginPath();
+    context.fillStyle = "yellow";
+    context.moveTo(-9.4, 2.5);
+    context.bezierCurveTo(-9.5, 3, -9.5, 3, -9.6, 2.5);
+    context.lineTo(-9.5, 4);
+    context.lineTo(-9.4, 2.5);
+    context.fill();
+    context.closePath();
+    // Padel
+    context.beginPath();
+    context.lineWidth = 0.2;
+    context.strokeStyle = "black";
+    context.moveTo(0, 2);
+    context.lineTo(0, 4);
+    context.stroke();
+    context.closePath();
+    // Gun
+    context.beginPath();
+    context.lineWidth = 0.4;
+    context.strokeStyle = "grey";
+    context.moveTo(0, -6);
+    context.lineTo(0, -7);
+    context.stroke();
+    context.closePath();
+    // Style Line
+    context.beginPath();
+    context.lineWidth = 0.2;
+    context.strokeStyle = "#00000030";
+    context.moveTo(-2, -2);
+    context.lineTo(-2, 2);
+    context.moveTo(2, -2);
+    context.lineTo(2, 2);
+    context.moveTo(-2, -3);
+    context.lineTo(2, -3);
+    context.moveTo(-9, -1);
+    context.lineTo(-9, 1);
+    context.moveTo(9, -1);
+    context.lineTo(9, 1);
+    context.stroke();
+    context.closePath();
   }
-  function drawPath(path, color, x, y, scale, alpha, health) {
+  function drawPath(path, color, x, y, scale, alpha) {
     context.save();
     context.translate(x, y);
     context.rotate(alpha);
@@ -127,6 +184,15 @@
 
     context.restore();
   }
+  function drawBorder(x, y, color, scale) {
+    let sign = Math.sign(canvas.width / 2 - x) * 1;
+    context.beginPath();
+    context.fillStyle = color + "11";
+    context.lineWidth = scale;
+    context.rect(x, y, canvas.width / 2, canvas.height);
+    context.fill();
+    context.closePath();
+  }
   function createSpaceShip(x, y, color, insideArray) {
     let myFingers = [];
     let isShooting = false;
@@ -150,6 +216,7 @@
     let health = spaceShipHealth;
 
     function draw() {
+      // Change the Possion Change with a max Speed of 4
       if (FingerPos.x != undefined) {
         deltaPos.x = FingerPos.x - x;
         deltaPos.y = FingerPos.y - y;
@@ -159,6 +226,7 @@
         y += deltaPos.y;
       }
 
+      // Shoots Laser when the Variable isShooting=ture and the last shot was befor 500ms
       if (isShooting && Math.abs(timestampFormLastShoot - Date.now()) > 500) {
         laser.push(createLaser(x, y, alpha - Math.PI / 2, color));
         shootSound.load();
@@ -166,8 +234,9 @@
         timestampFormLastShoot = Date.now();
       }
 
-      Matrix = drawPath(path, color, x, y, 12, alpha, health);
-      drawHealthBar(health, healthBarX, 12);
+      Matrix = drawPath(path, color, x, y, globalScale, alpha, health);
+      drawHealthBar(health, healthBarX, globalScale);
+      drawBorder(insideArray[0], insideArray[1], color, globalScale);
       isHitByLaser();
       return isDestroyed;
     }
@@ -181,6 +250,7 @@
         }
       }
     }
+    // Shout ob die 2 finger beim Touch start in der Richtigen Hälfte ist
     function TouchIsInsideSpaceShip(touch) {
       let isInsideRect = new Path2D();
       isInsideRect.rect(
@@ -194,16 +264,6 @@
       return context.isPointInPath(isInsideRect, touch.clientX, touch.clientY);
     }
     function isInside(touch) {
-      let isInsideRect = new Path2D();
-      isInsideRect.rect(
-        insideArray[0],
-        insideArray[1],
-        insideArray[2],
-        insideArray[3]
-      );
-      context.closePath();
-      //Merken die Possition des Fingers merk
-
       if (TouchIsInsideSpaceShip(touch)) {
         let allIdentifer = [];
         if (myFingers.length > 0)
@@ -223,23 +283,25 @@
       }
     }
     function moveTo(touch) {
-      updateMyFingers(touch);
+      if (TouchIsInsideSpaceShip(touch)) {
+        updateMyFingers(touch);
 
-      if (myFingers.length > 1) {
-        FingerPos = {
-          x: (myFingers[0].x + myFingers[1].x) / 2,
-          y: (myFingers[0].y + myFingers[1].y) / 2,
-        };
-        let newAngle =
-          Math.atan2(
-            myFingers[0].y - myFingers[1].y,
-            myFingers[0].x - myFingers[1].x
-          ) + Math.PI;
-        if (oldAngle) {
-          deltaAngle = newAngle - oldAngle;
-          alpha += deltaAngle;
+        if (myFingers.length > 1) {
+          FingerPos = {
+            x: (myFingers[0].x + myFingers[1].x) / 2,
+            y: (myFingers[0].y + myFingers[1].y) / 2,
+          };
+          let newAngle =
+            Math.atan2(
+              myFingers[0].y - myFingers[1].y,
+              myFingers[0].x - myFingers[1].x
+            ) + Math.PI;
+          if (oldAngle) {
+            deltaAngle = newAngle - oldAngle;
+            alpha += deltaAngle;
+          }
+          oldAngle = newAngle;
         }
-        oldAngle = newAngle;
       }
     }
     function updateMyFingers(touch) {
@@ -652,7 +714,7 @@
         "<- Your Healthbar, which show your current health." +
           " Every Player starts with " +
           spaceShipHealth +
-          " health"
+          " health."
       );
 
       addTextBox(
@@ -661,7 +723,7 @@
         canvas.width / 2,
         canvas.width / 64,
         "black",
-        "<- These are walls, where you or your enemies can hied. The wall can take " +
+        "<- These are walls, where you or your enemies can hide. The wall can take " +
           wallHealth +
           " shots by YOU or YOUR ENEMY befor geting destroyed."
       );
@@ -672,7 +734,7 @@
         canvas.width / 2,
         canvas.width / 64,
         "black",
-        "<- These is a SpaceShips. They move to the Point between the your first two you place in your own half Fingers with a certen Speed. You can change the angle of the SpaceShip with the Rotation of your both first two fingers. You can shoot Laser by touching your half with a 3rd Finger."
+        "<- These is a SpaceShips. They move to the Point between the your first two Fingers place in your own half, with a certen Speed. You can change the angle of the SpaceShip with the Rotation of your both first two fingers. You can shoot Laser by touching your half with a 3rd Finger."
       );
       addTextBox(
         0,
