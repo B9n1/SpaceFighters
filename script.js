@@ -854,7 +854,7 @@
     event.preventDefault();
 
     // Pre-Load Sounds for Browser, after the first Touch
-    if (firsttimeloading) {
+    if (firsttimeloading && page === "game") {
       shootSound.play();
       shootSound.pause();
       shootSound.currentTime = 0;
