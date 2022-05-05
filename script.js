@@ -783,8 +783,10 @@
   }
   // Creates the game page
   function gamePage() {
-    gameSound.loop = true;
-    gameSound.play();
+    try {
+      gameSound.loop = true;
+      gameSound.play();
+    } catch {}
 
     if (SpaceShips.length == 1) page = "endGame";
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -855,27 +857,29 @@
 
     // Pre-Load Sounds for Browser, after the first Touch
     if (firsttimeloading && page === "game") {
-      shootSound.play();
-      shootSound.pause();
-      shootSound.currentTime = 0;
+      try {
+        shootSound.play();
+        shootSound.pause();
+        shootSound.currentTime = 0;
 
-      hitSound.play();
-      hitSound.pause();
-      hitSound.currentTime = 0;
+        hitSound.play();
+        hitSound.pause();
+        hitSound.currentTime = 0;
 
-      hitWallSound.play();
-      hitWallSound.pause();
-      hitWallSound.currentTime = 0;
+        hitWallSound.play();
+        hitWallSound.pause();
+        hitWallSound.currentTime = 0;
 
-      destroyedSound.play();
-      destroyedSound.pause();
-      destroyedSound.currentTime = 0;
+        destroyedSound.play();
+        destroyedSound.pause();
+        destroyedSound.currentTime = 0;
 
-      gameSound.play();
-      gameSound.pause();
-      gameSound.currentTime = 0;
-      gameSound.volume = 0.5;
-      firsttimeloading = false;
+        gameSound.play();
+        gameSound.pause();
+        gameSound.currentTime = 0;
+        gameSound.volume = 0.5;
+        firsttimeloading = false;
+      } catch (err) {}
     }
     // Displays the Menu Button
     if (page === "menu") {
