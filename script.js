@@ -784,9 +784,11 @@
   // Creates the game page
   function gamePage() {
     try {
-      gameSound.loop = true;
-      gameSound.play();
-    } catch {}
+      if (!firsttimeloading) {
+        gameSound.loop = true;
+        gameSound.play();
+      }
+    } catch (err) {}
 
     if (SpaceShips.length == 1) page = "endGame";
     context.clearRect(0, 0, canvas.width, canvas.height);
