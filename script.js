@@ -677,6 +677,11 @@
   function tutorialPage() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
+    context.beginPath();
+    context.font = 2 * globalScale + "px OldSchoolAdventures";
+    context.fillStyle = "yellow";
+    context.fillText("Toch Me!", canvas.width / 8, canvas.height / 8);
+    context.closePath();
     context.translate(canvas.width / 2, 0);
     context.beginPath();
     context.fillStyle = "white";
@@ -684,8 +689,6 @@
     context.fill();
     context.closePath();
     context.beginPath();
-    context.fillStyle = "red";
-    context.font = "20px Georgia";
 
     addTextBox(
       0,
@@ -693,7 +696,7 @@
       canvas.width / 2,
       canvas.width / 64,
       "black",
-      "<- Your Healthbar, which shows your current health." +
+      "<- This is your Healthbar, which shows your current health." +
         " Every Player starts with " +
         spaceShipHealth +
         " health, represented by " +
