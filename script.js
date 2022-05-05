@@ -701,7 +701,7 @@
         spaceShipHealth +
         " health, represented by " +
         spaceShipHealth +
-        " harts."
+        " harts. The winner is, who brings the enemy to 0."
     );
 
     addTextBox(
