@@ -4,7 +4,7 @@
   //////////////////////////////////////////////////////////////////////////////////
 
   let page = "menu";
-  // function to detect if is iOS to prevent the lags true audio
+  // function to detect if is iOS to prevent the lags thrue audio
   function iOS() {
     return (
       [
@@ -27,8 +27,13 @@
   const laserDamge = 1;
   const spaceShipHealth = 10;
   const wallHealth = 30;
+  // To load all Paramters on the first load
   let firsttimeloading = true;
+  // Scaling Paramater
   let globalScale = 12;
+
+  const blueColor = "#379A9A";
+  const redColor = "#A91F1F";
   //Sounds
   let shootSound = new Audio("MusicAndSounds/Shot.wav");
   let hitSound = new Audio("MusicAndSounds/Hit.wav");
@@ -39,7 +44,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Space Ships /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  function createPath() {
+  function createSpaceShipPath() {
     let spaceShip = new Path2D();
     spaceShip.moveTo(-10, -2);
     spaceShip.lineTo(-9, -2);
@@ -66,7 +71,7 @@
     spaceShip.closePath();
     return spaceShip;
   }
-  function createEngineAndFlames() {
+  function createSpaceShipDecoration() {
     context.beginPath();
     // Engine
     context.rect(-1, 4, 2, 1);
@@ -157,12 +162,12 @@
     context.stroke();
     context.closePath();
   }
-  function drawPath(path, color, x, y, scale, alpha) {
+  function drawSpaceShip(path, color, x, y, scale, alpha) {
     context.save();
     context.translate(x, y);
     context.rotate(alpha);
     context.scale(scale, scale);
-    context.lineWitdth = 6;
+    context.lineWitdth = scale / 2;
     context.strokeStyle = "white";
     context.fillStyle = color;
     context.fill(path);
@@ -173,7 +178,7 @@
     context.closePath();
 
     //Engine and Flames
-    createEngineAndFlames();
+    createSpaceShipDecoration();
     //Matrix
     let Matrix = context.getTransform();
     context.restore();
@@ -230,7 +235,7 @@
     let healthBarX =
       canvas.width / 2 - (canvas.width / 4) * Math.sign(canvas.width / 2 - x);
     let Matrix;
-    const path = createPath();
+    const path = createSpaceShipPath();
     let isDestroyed = false;
     let health = spaceShipHealth;
 
@@ -253,13 +258,15 @@
         timestampFormLastShoot = Date.now();
       }
 
-      Matrix = drawPath(path, color, x, y, globalScale, alpha, health);
+      Matrix = drawSpaceShip(path, color, x, y, globalScale, alpha, health);
       drawHealthBar(health, healthBarX, globalScale);
+      // Draw  Border on game mode
       if (page === "game")
         drawBorder(insideArray[0], insideArray[1], color, globalScale);
       isHitByLaser();
       return isDestroyed;
     }
+    // check if selfe is hit by a laser
     function isHitByLaser() {
       let localMatrix = DOMMatrix.fromMatrix(Matrix);
       localMatrix.invertSelf();
@@ -289,6 +296,7 @@
       //Merken die Possition des Fingers merk
       return context.isPointInPath(isInsideRect, touch.clientX, touch.clientY);
     }
+    // Function to check if figer are inside and add elements to Objec parameter
     function isInside(touch) {
       if (TouchIsInsideSpaceShip(touch)) {
         let allIdentifer = [];
@@ -308,6 +316,7 @@
         oldY = touch.clientY;
       }
     }
+    // Update Changes of the SpaceShip
     function moveTo(touch) {
       if (TouchIsInsideSpaceShip(touch)) {
         updateMyFingers(touch);
@@ -330,6 +339,7 @@
         }
       }
     }
+    // Update Fingers Specific x and y
     function updateMyFingers(touch) {
       for (let i = 0; i < myFingers.length; i++) {
         if (myFingers[i].identifier === touch.identifier) {
@@ -338,6 +348,7 @@
         }
       }
     }
+    // Reset ether just back to the first 2 Fingers or the hole object
     function reset(deletedFingerIdentifier) {
       for (let f of myFingers) {
         if (f.identifier === deletedFingerIdentifier) {
@@ -404,12 +415,14 @@
       move();
       return isInsideCanvas();
     }
+    // Move Laser function
     function move() {
       let deltaY = Math.sin(angle) * speed;
       let deltaX = Math.cos(angle) * speed;
       x += deltaX;
       y += deltaY;
     }
+    // Check if the Laser Hit the outer Object
     function didItHit(objectPath, objectMatrix, objectColor) {
       if (color === objectColor) return false;
       let localMatrix = DOMMatrix.fromMatrix(objectMatrix);
@@ -420,6 +433,7 @@
         myDOMPoint.x,
         myDOMPoint.y
       );
+      // When hit teleport outside not visable Part for delition
       if (laserHit) {
         x = -canvas.width;
         y = -canvas.height;
@@ -427,6 +441,7 @@
 
       return laserHit;
     }
+    // Check if the Laser is in the visable part of the Canvas
     function isInsideCanvas() {
       if (canvas.width < x || canvas.height < y || x < 0 || y < 0) return false;
       else return true;
@@ -460,7 +475,6 @@
     crack.closePath();
     return crack;
   }
-
   function drawWall(wpath, x, y, scale, health) {
     context.save();
     context.translate(x, y);
@@ -500,6 +514,7 @@
       isHitByLaser();
       return isDestroyed;
     }
+    // Check if it hit by laser
     function isHitByLaser() {
       for (let l of laser) {
         if (l.didItHit(wallPath, Matrix)) {
@@ -559,7 +574,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Tutorial Object /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  function tutorialObjectPath() {
+  function createTutorialObjectPath() {
     const tutorialObject = new Path2D();
     tutorialObject.arc(0, 0, 4, 0, 2 * Math.PI);
     tutorialObject.closePath();
@@ -578,13 +593,14 @@
     return Matrix;
   }
   function createTutorialObject(x, y) {
-    const ObjectPath = tutorialObjectPath();
+    const ObjectPath = createTutorialObjectPath();
     let Matrix;
 
     function draw() {
       Matrix = drawTutorialObject(ObjectPath, x, y, globalScale);
       isHitByLaser();
     }
+    // Check if it hit by laser
     function isHitByLaser() {
       for (let l of laser) {
         if (l.didItHit(ObjectPath, Matrix)) {
@@ -597,7 +613,7 @@
   //////////////////////////////////////////////////////////////////////////////////
   /////////// Objects /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
-  let objects = [];
+  let SpaceShips = [];
   let laser = [];
   let walls = [];
   let buttons = [];
@@ -612,8 +628,8 @@
   walls.push(createWall((canvas.width * 1) / 3, (canvas.height * 3) / 4));
   walls.push(createWall((canvas.width * 2) / 3, (canvas.height * 3) / 4));
 
-  objects.push(
-    createSpaceShip(canvas.width / 8, canvas.height / 2, "#A91F1F", [
+  SpaceShips.push(
+    createSpaceShip(canvas.width / 8, canvas.height / 2, redColor, [
       0,
       0,
       context.canvas.width / 2,
@@ -621,8 +637,8 @@
     ])
   );
 
-  objects.push(
-    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, "#379A9A", [
+  SpaceShips.push(
+    createSpaceShip((canvas.width * 7) / 8, canvas.height / 2, blueColor, [
       context.canvas.width / 2,
       0,
       context.canvas.width / 2,
@@ -633,80 +649,7 @@
   /////////// Pages /////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////
 
-  //////////////////////////////////////////////////////////////////////////////////
-  /////////// Touch Events /////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////////
-  let touchesIdentifier = [];
-
-  canvas.addEventListener("touchstart", (event) => {
-    event.preventDefault();
-    // Load Sounds for Safari
-
-    if (firsttimeloading) {
-      shootSound.play();
-      shootSound.pause();
-      shootSound.currentTime = 0;
-
-      hitSound.play();
-      hitSound.pause();
-      hitSound.currentTime = 0;
-
-      hitWallSound.play();
-      hitWallSound.pause();
-      hitWallSound.currentTime = 0;
-
-      destroyedSound.play();
-      destroyedSound.pause();
-      destroyedSound.currentTime = 0;
-
-      gameSound.play();
-      gameSound.pause();
-      gameSound.currentTime = 0;
-      gameSound.volume = 0.5;
-      firsttimeloading = false;
-    }
-
-    if (page === "menu") {
-      for (let b of buttons) {
-        b.isInside(event.touches[0].clientX, event.touches[0].clientY);
-      }
-    }
-    if (page === "endGame") window.location.reload(true);
-    if (page === "game" || page === "tutorial") {
-      for (let touch of event.touches) {
-        touchesIdentifier.push(touch.identifier);
-        for (let o of objects) {
-          o.isInside(touch);
-        }
-      }
-    }
-  });
-  canvas.addEventListener("touchmove", (event) => {
-    event.preventDefault();
-
-    if (page === "game" || page === "tutorial") {
-      for (let touch of event.touches) {
-        for (let o of objects) {
-          o.moveTo(touch);
-        }
-      }
-    }
-  });
-  canvas.addEventListener("touchend", (event) => {
-    event.preventDefault();
-
-    if (page === "game" || page === "tutorial") {
-      let temp = [];
-      for (let touch of event.touches) temp.push(touch.identifier);
-      let difference = touchesIdentifier.filter((x) => !temp.includes(x));
-      for (let d of difference) {
-        for (let o of objects) {
-          o.reset(d);
-        }
-      }
-    }
-  });
-
+  // Make TextBoxes to automaticly wrap text
   function addTextBox(x, y, maxWidth, lineHeight, color, text) {
     context.font = lineHeight + "px OldSchoolAdventures";
 
@@ -730,167 +673,267 @@
       }
     }
   }
-  function draw() {
-    if (page === "tutorial") {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.save();
-      context.translate(canvas.width / 2, 0);
-      context.beginPath();
-      context.fillStyle = "white";
-      context.rect(-canvas.width * 0.02, 0, canvas.width * 1.02, canvas.height);
-      context.fill();
-      context.closePath();
-      context.beginPath();
-      context.fillStyle = "red";
-      context.font = "20px Georgia";
+  // Creates the tutorial page
+  function tutorialPage() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.translate(canvas.width / 2, 0);
+    context.beginPath();
+    context.fillStyle = "white";
+    context.rect(-canvas.width * 0.02, 0, canvas.width * 1.02, canvas.height);
+    context.fill();
+    context.closePath();
+    context.beginPath();
+    context.fillStyle = "red";
+    context.font = "20px Georgia";
 
-      addTextBox(
-        0,
-        canvas.height * 0.05,
-        canvas.width / 2,
-        canvas.width / 64,
-        "black",
-        "<- Your Healthbar, which shows your current health." +
-          " Every Player starts with " +
-          spaceShipHealth +
-          " health, represented by " +
-          spaceShipHealth +
-          " harts."
-      );
+    addTextBox(
+      0,
+      canvas.height * 0.05,
+      canvas.width / 2,
+      canvas.width / 64,
+      "black",
+      "<- Your Healthbar, which shows your current health." +
+        " Every Player starts with " +
+        spaceShipHealth +
+        " health, represented by " +
+        spaceShipHealth +
+        " harts."
+    );
 
-      addTextBox(
-        0,
-        canvas.height / 4,
-        canvas.width / 2,
-        canvas.width / 64,
-        "black",
-        "<- These are walls, where you or your enemies can hide. The wall can take " +
-          wallHealth +
-          " shots by YOU or YOUR ENEMY before getting destroyed."
-      );
+    addTextBox(
+      0,
+      canvas.height / 4,
+      canvas.width / 2,
+      canvas.width / 64,
+      "black",
+      "<- These are walls, where you or your enemies can hide. The wall can take " +
+        wallHealth +
+        " shots by YOU or YOUR ENEMY before getting destroyed."
+    );
 
-      addTextBox(
-        0,
-        canvas.height / 2,
-        canvas.width / 2,
-        canvas.width / 64,
-        "black",
-        "<- This is a SpaceShip. SpaceShips move to the Point between your first 2 placed Fingers, in your own half.  The SpaceShip self has a max Speed. You can change the angle of the SpaceShip with the rotation of your both first 2 Fingers. You can shoot Laser by touching your half with a 3rd Finger."
-      );
-      addTextBox(
-        0,
-        canvas.height * 0.9,
-        canvas.width * 0.3,
-        canvas.width / 64,
-        "red",
-        "Shoot the RED circle to return to the Menu"
-      );
-      context.restore();
+    addTextBox(
+      0,
+      canvas.height / 2,
+      canvas.width / 2,
+      canvas.width / 64,
+      "black",
+      "<- This is a SpaceShip. SpaceShips move to the Point between your first 2 placed Fingers, in your own half.  The SpaceShip self has a max Speed. You can change the angle of the SpaceShip with the rotation of your both first 2 Fingers. You can shoot Laser by touching your half with a 3rd Finger."
+    );
+    addTextBox(
+      0,
+      canvas.height * 0.9,
+      canvas.width * 0.3,
+      canvas.width / 64,
+      "red",
+      "Shoot the RED circle to return to the Menu"
+    );
+    context.restore();
 
-      for (let l of laser) {
-        if (laser[0] !== undefined)
-          if (!l.draw()) delete laser[laser.indexOf(l)];
-        laser = laser.filter(function (element) {
-          return element !== undefined;
-        });
-      }
-
-      for (let o of tutorialObjects) {
-        o.draw();
-      }
-      objects[0].draw();
-      walls[0].draw();
-      walls[2].draw();
+    for (let l of laser) {
+      if (laser[0] !== undefined) if (!l.draw()) delete laser[laser.indexOf(l)];
+      laser = laser.filter(function (element) {
+        return element !== undefined;
+      });
     }
-    if (page === "menu") {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.save();
-      context.translate(canvas.width / 2, canvas.height / 2);
-      context.scale(globalScale, globalScale);
-      context.lineWitdth = 6;
-      context.beginPath();
-      context.fillStyle = "white";
-      context.rect(-20, -20, 40, 40);
-      context.fill();
-      context.closePath();
 
-      context.beginPath();
-      context.font = "3px OldSchoolAdventures";
-
-      let text = "SpaceFighters";
-      var gradient = context.createLinearGradient(
-        0,
-        0,
-        context.measureText(text).width,
-        0
-      );
-      gradient.addColorStop(0, "#A91F1F");
-      gradient.addColorStop(0.2, "#379A9A");
-      context.fillStyle = gradient;
-      context.fillText(text, -context.measureText(text).width / 2, -15);
-      context.closePath();
-
-      for (let b of buttons) {
-        b.draw();
-      }
-      context.restore();
+    for (let o of tutorialObjects) {
+      o.draw();
     }
-    if (page === "game") {
-      gameSound.loop = true;
+    SpaceShips[0].draw();
+    walls[0].draw();
+    walls[2].draw();
+  }
+  // Creates the menu page
+  function menuPage() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(globalScale, globalScale);
+    context.lineWitdth = 6;
+    context.beginPath();
+    context.fillStyle = "white";
+    context.rect(-20, -20, 40, 40);
+    context.fill();
+    context.closePath();
+
+    context.beginPath();
+    context.font = "3px OldSchoolAdventures";
+
+    let text = "SpaceFighters";
+    var gradient = context.createLinearGradient(
+      0,
+      0,
+      context.measureText(text).width,
+      0
+    );
+    gradient.addColorStop(0, redColor);
+    gradient.addColorStop(0.2, blueColor);
+    context.fillStyle = gradient;
+    context.fillText(text, -context.measureText(text).width / 2, -15);
+    context.closePath();
+
+    for (let b of buttons) {
+      b.draw();
+    }
+    context.restore();
+  }
+  // Creates the game page
+  function gamePage() {
+    gameSound.loop = true;
+    gameSound.play();
+
+    if (SpaceShips.length == 1) page = "endGame";
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    // Loops thru Laser an check if they exist in the Visable Canvas Area and draws them
+    //If dont they get filtered out of the Array
+    for (let l of laser) {
+      if (laser[0] !== undefined) if (!l.draw()) delete laser[laser.indexOf(l)];
+      laser = laser.filter(function (element) {
+        return element !== undefined;
+      });
+    }
+    // Loops thru SpaceShips an check if they exist and draws them if they do.
+    //If dont they get filtered out of the Array
+
+    for (let s of SpaceShips) {
+      if (SpaceShips[0] !== undefined)
+        if (s.draw()) delete SpaceShips[SpaceShips.indexOf(s)];
+      SpaceShips = SpaceShips.filter(function (element) {
+        return element !== undefined;
+      });
+    }
+    // Loops thru Walls an check if they exist and draws them if they do
+    //If dont they get filtered out of the Array
+    for (let w of walls) {
+      if (walls[0] !== undefined) if (w.draw()) delete walls[walls.indexOf(w)];
+      walls = walls.filter(function (element) {
+        return element !== undefined;
+      });
+    }
+  }
+  // Creates the End Game PoP up page
+  function endGamePage() {
+    context.save();
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(globalScale, globalScale);
+    context.lineWitdth = globalScale / 2;
+    context.beginPath();
+    context.fillStyle = "white";
+    context.rect(-20, -20, 40, 40);
+
+    context.fill();
+
+    context.font = "2px OldSchoolAdventures";
+    context.fillStyle = "black";
+    let text = "The Winner is";
+    context.fillText(text, -context.measureText(text).width / 2, -2);
+    text = SpaceShips[0].color;
+    if (SpaceShips[0].color === blueColor) text = "BLUE";
+    else text = "RED";
+    context.fillStyle = SpaceShips[0].color;
+    context.fillText(text, -context.measureText(text).width / 2, 2);
+    context.fillStyle = "orange";
+    text = "(Click to return";
+    context.fillText(text, -context.measureText(text).width / 2, 8);
+    text = " to the Menu)";
+    context.fillText(text, -context.measureText(text).width / 2, globalScale);
+    context.restore();
+    context.closePath();
+  }
+  //////////////////////////////////////////////////////////////////////////////////
+  /////////// Touch Events /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
+  // Save the touches to identifi later the touchEnd Fingers
+  let touchesIdentifier = [];
+
+  canvas.addEventListener("touchstart", (event) => {
+    event.preventDefault();
+
+    // Pre-Load Sounds for Browser, after the first Touch
+    if (firsttimeloading) {
+      shootSound.play();
+      shootSound.pause();
+      shootSound.currentTime = 0;
+
+      hitSound.play();
+      hitSound.pause();
+      hitSound.currentTime = 0;
+
+      hitWallSound.play();
+      hitWallSound.pause();
+      hitWallSound.currentTime = 0;
+
+      destroyedSound.play();
+      destroyedSound.pause();
+      destroyedSound.currentTime = 0;
+
       gameSound.play();
-
-      if (objects.length == 1) page = "endGame";
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      for (let l of laser) {
-        if (laser[0] !== undefined)
-          if (!l.draw()) delete laser[laser.indexOf(l)];
-        laser = laser.filter(function (element) {
-          return element !== undefined;
-        });
-      }
-      for (let o of objects) {
-        if (objects[0] !== undefined)
-          if (o.draw()) delete objects[objects.indexOf(o)];
-        objects = objects.filter(function (element) {
-          return element !== undefined;
-        });
-      }
-
-      for (let w of walls) {
-        if (walls[0] !== undefined)
-          if (w.draw()) delete walls[walls.indexOf(w)];
-        walls = walls.filter(function (element) {
-          return element !== undefined;
-        });
+      gameSound.pause();
+      gameSound.currentTime = 0;
+      gameSound.volume = 0.5;
+      firsttimeloading = false;
+    }
+    // Displays the Menu Button
+    if (page === "menu") {
+      for (let b of buttons) {
+        b.isInside(event.touches[0].clientX, event.touches[0].clientY);
       }
     }
-    if (page === "endGame") {
-      context.save();
-      context.translate(canvas.width / 2, canvas.height / 2);
-      context.scale(globalScale, globalScale);
-      context.lineWitdth = globalScale / 2;
-      context.beginPath();
-      context.fillStyle = "white";
-      context.rect(-20, -20, 40, 40);
+    if (page === "endGame") window.location.reload(true);
+    // Call SpaceShips Objects and give theme the touches to work with them
+    if (page === "game" || page === "tutorial") {
+      for (let touch of event.touches) {
+        touchesIdentifier.push(touch.identifier);
+        for (let s of SpaceShips) {
+          s.isInside(touch);
+        }
+      }
+    }
+  });
+  canvas.addEventListener("touchmove", (event) => {
+    event.preventDefault();
+    // Give the SpaceShips the Changes of the touches
+    if (page === "game" || page === "tutorial") {
+      for (let touch of event.touches) {
+        for (let s of SpaceShips) {
+          s.moveTo(touch);
+        }
+      }
+    }
+  });
+  canvas.addEventListener("touchend", (event) => {
+    event.preventDefault();
+    // Check for the touches, that ended and safe them in differences
+    if (page === "game" || page === "tutorial") {
+      let temp = [];
+      for (let touch of event.touches) temp.push(touch.identifier);
+      let difference = touchesIdentifier.filter((x) => !temp.includes(x));
+      for (let d of difference) {
+        for (let s of SpaceShips) {
+          s.reset(d);
+        }
+      }
+    }
+  });
 
-      context.fill();
-
-      context.font = "2px OldSchoolAdventures";
-      context.fillStyle = "black";
-      let text = "The Winner is";
-      context.fillText(text, -context.measureText(text).width / 2, -2);
-      text = objects[0].color;
-      if (objects[0].color === "#379A9A") text = "BLUE";
-      else text = "RED";
-      context.fillStyle = objects[0].color;
-      context.fillText(text, -context.measureText(text).width / 2, 2);
-      context.fillStyle = "orange";
-      text = "(Click to return";
-      context.fillText(text, -context.measureText(text).width / 2, 8);
-      text = " to the Menu)";
-      context.fillText(text, -context.measureText(text).width / 2, globalScale);
-      context.restore();
-      context.closePath();
+  //////////////////////////////////////////////////////////////////////////////////
+  /////////// Draw Function /////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
+  function draw() {
+    switch (page) {
+      case "tutorial":
+        tutorialPage();
+        break;
+      case "menu":
+        menuPage();
+        break;
+      case "game":
+        gamePage();
+        break;
+      case "endGame":
+        endGamePage();
+        break;
     }
   }
 
